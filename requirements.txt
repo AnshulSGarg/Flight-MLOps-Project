@@ -8,5 +8,6 @@
 # awscli
 # flake8
 # python-dotenv
-pandas
+# pandas
+# scikit-learn
 
