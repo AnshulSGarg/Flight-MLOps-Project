@@ -31,39 +31,38 @@
 
 
 import pandas as pd
+import numpy as np
 import pathlib
 import yaml
 import sys
+import os
+from pandas.tseries.holiday import USFederalHolidayCalendar
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
-from pandas.tseries.holiday import USFederalHolidayCalendar
-import os
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.model_selection import KFold, cross_val_score
 
 
-def load_data(path):
-    print('run load data')
-    df = pd.read_csv(path)
-    return df
-def split_data(df, split, seed):
-    print('run split data')
-    train, test = train_test_split(df, split, seed)
-    return train, test
-def save_data(train, test, output_dir):
-    pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
-    train.to_csv(os.path.join(output_dir, 'train.csv'), index=False)
-    test.to_csv(os.path.join(output_dir, 'test.csv'), index=False)
+# def load_data(path):
+#     print('run load data')
+#     df = pd.read_csv(path)
+#     return df
 
-def merge_csv_files(folder_path):
-    csv_files = [file for file in os.listdir(folder_path) if file.endswith('.csv')]
-    dfs = []
-    for file in csv_files:
-        file_path = os.path.join(folder_path, file)
-        df = pd.read_csv(file_path)
-        dfs.append(df)
-    merged_df = pd.concat(dfs, ignore_index=True)
-    return merged_df
+# def split_data(df, split, seed):
+#     print('run split data')
+#     train, test = train_test_split(df, split, seed)
+#     return train, test
+# def save_data(train, test, output_dir):
+#     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
+#     train.to_csv(os.path.join(output_dir, 'train.csv'), index=False)
+#     test.to_csv(os.path.join(output_dir, 'test.csv'), index=False)
 
 def holiday():
+    print('get all holidays in 2024')
     cal = USFederalHolidayCalendar()
     holidays = cal.holidays(start='2024-01-01', end='2024-12-31').to_pydatetime()
     holiday_df = pd.DataFrame(holidays, columns=['Holiday'])
@@ -81,24 +80,27 @@ def get_second_carbon_value(arr):
     else:
         return None
 
-
-# Display the merged DataFrame
-
-def main():
-    curr_dir = pathlib.Path(__file__)
-    home_dir = curr_dir.parent.parent.parent
-    raw_path = home_dir.as_posix() + r'/data/raw'
-    merged_path = home_dir.as_posix() + r'/data/interim'
-    processed_path = home_dir.as_posix() + r'/data/processed'
-
-    merged_df = merge_csv_files(raw_path)
+def run_merge_csv_files(folder_path,merged_path):
+    print('merging all raw data')
+    csv_files = [file for file in os.listdir(folder_path) if file.endswith('.csv')]
+    dfs = []
+    for file in csv_files:
+        file_path = os.path.join(folder_path, file)
+        df = pd.read_csv(file_path)
+        dfs.append(df)
+    merged_df = pd.concat(dfs, ignore_index=True)
     merged_df = merged_df.reset_index()
     merged_df = merged_df[['Report_Run_Time', 'carrier', 'from_loc',
        'to_loc', 'stop', 'price', 'from_timestamp', 'to_timestamp',
        'from_date', 'to_date', 'carbon_emission', 'overhead_bin', 'layover',
        'details', 'round_trip_duration']]
     merged_df.to_csv(merged_path + r'/merged_raw_data.csv')
+    
+def run_processed_data(merged_path, processed_path):
+    print('processing data')
 
+    merged_df = pd.read_csv(merged_path + r'/merged_raw_data.csv')    
+    
     merged_df = merged_df[~merged_df['price'].isnull()]
 
     merged_df.loc[merged_df['carrier'].str.contains('Separate tickets'), 'carrier'] = 'Third Party'
@@ -237,8 +239,57 @@ def main():
         'Holiday', 'Fly_WeekDay', 'price']]
 
     merged_df = merged_df.drop_duplicates(keep='first')
-    print(processed_path + r'/processed_raw_data.csv')
+    merged_df = merged_df[merged_df['flight_duration_value']<=16.5]
+    merged_df['price_transformed'] = np.log(merged_df['price'])
     merged_df.to_csv(processed_path + r'/processed_raw_data.csv')
+
+columns_to_one_hot_encode = ['carrier','Trip_Type','Airport_Route', 'Holiday','from_hour','stop']
+columns_to_scale = ['round_trip_duration', 'Days_to_Fly', 'flight_duration_value']
+
+
+def main():
+    curr_dir = pathlib.Path(__file__)
+    home_dir = curr_dir.parent.parent.parent
+    raw_path = home_dir.as_posix() + r'/data/raw'
+    merged_path = home_dir.as_posix() + r'/data/interim'
+    processed_path = home_dir.as_posix() + r'/data/processed'
+
+    run_merge_csv_files(raw_path,merged_path)
+    run_processed_data(merged_path, processed_path)
+
+    processed_data = pd.read_csv(processed_path + r'/processed_raw_data.csv')
+    
+    X = processed_data[['carrier', 'Trip_Type', 'Airport_Route', 'round_trip_duration',
+       'Days_to_Fly', 'from_hour', 'flight_duration_value', 'Holiday',
+       'Fly_WeekDay']]
+    
+    Y = processed_data[['price_transformed']]
+
+        
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', StandardScaler(), columns_to_scale),
+            # ('cat', OrdinalEncoder(), columns_to_encode),
+            ('cat1',OneHotEncoder(drop='first'),columns_to_one_hot_encode)
+        ], 
+        remainder='passthrough'
+    )
+
+    pipeline = Pipeline([
+    ('preprocessor', preprocessor),
+    ('regressor', RandomForestRegressor())])
+
+   
+    # K-fold cross-validation
+    kfold = KFold(n_splits=10, shuffle=True, random_state=42)
+    scores = cross_val_score(pipeline, X, Y, cv= kfold, scoring='r2')
+
+    print(scores.mean(),scores.std())
+
+
+
+    
+
 
 
 
