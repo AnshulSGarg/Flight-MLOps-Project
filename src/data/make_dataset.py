@@ -45,17 +45,19 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import KFold, cross_val_score
+from sklearn.metrics import mean_absolute_error
+from sklearn.metrics import r2_score
+import warnings
 
+# Ignore specific warning by category
+warnings.filterwarnings("ignore", category=UserWarning)
+# warnings.filterwarnings("ignore", category=DataConversionWarning)
 
-# def load_data(path):
-#     print('run load data')
-#     df = pd.read_csv(path)
-#     return df
+def split_data(df, split, seed):
+    print('run split data')
+    train, test = train_test_split(df, split, seed)
+    return train, test
 
-# def split_data(df, split, seed):
-#     print('run split data')
-#     train, test = train_test_split(df, split, seed)
-#     return train, test
 # def save_data(train, test, output_dir):
 #     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
 #     train.to_csv(os.path.join(output_dir, 'train.csv'), index=False)
@@ -94,12 +96,12 @@ def run_merge_csv_files(folder_path,merged_path):
        'to_loc', 'stop', 'price', 'from_timestamp', 'to_timestamp',
        'from_date', 'to_date', 'carbon_emission', 'overhead_bin', 'layover',
        'details', 'round_trip_duration']]
-    merged_df.to_csv(merged_path + r'/merged_raw_data.csv')
+    merged_df.to_csv(merged_path)
     
 def run_processed_data(merged_path, processed_path):
     print('processing data')
 
-    merged_df = pd.read_csv(merged_path + r'/merged_raw_data.csv')    
+    merged_df = pd.read_csv(merged_path)    
     
     merged_df = merged_df[~merged_df['price'].isnull()]
 
@@ -241,25 +243,53 @@ def run_processed_data(merged_path, processed_path):
     merged_df = merged_df.drop_duplicates(keep='first')
     merged_df = merged_df[merged_df['flight_duration_value']<=16.5]
     merged_df['price_transformed'] = np.log(merged_df['price'])
-    merged_df.to_csv(processed_path + r'/processed_raw_data.csv')
+    merged_df.to_csv(processed_path)
 
 columns_to_one_hot_encode = ['carrier','Trip_Type','Airport_Route', 'Holiday','from_hour','stop']
 columns_to_scale = ['round_trip_duration', 'Days_to_Fly', 'flight_duration_value']
 
 
+
+
+
+
+# print(f'input_file is {input_file}')
+# data_path = home_dir.as_posix()
+# print(f'data_path id {data_path}')
+# output_path = home_dir.as_posix()
+# print(f'output_path is {output_path}')
+# data = load_data(data_path)
+# print(f'main data is {data.shape}')
+# # train_data, test_data = train_test_split(data, test_size=params['test_split'], random_state=params['seed'])
+# print(f'train_data is {train_data.shape}')
+# save_data(train_data, test_data, output_path)
+
+
+
 def main():
     curr_dir = pathlib.Path(__file__)
     home_dir = curr_dir.parent.parent.parent
+
+    # params_file = home_dir / 'params.yaml'
+    params_file = r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\params.yaml'
+    print(f'params_file is {params_file}')
+    print(yaml.safe_load(open(params_file)))
+    params = yaml.safe_load(open(params_file))["make_dataset"]
+    print(f'params is {params}')
+
     raw_path = home_dir.as_posix() + r'/data/raw'
-    merged_path = home_dir.as_posix() + r'/data/interim'
-    processed_path = home_dir.as_posix() + r'/data/processed'
+    # merged_path = home_dir.as_posix() + r'/data/interim'
+    merged_path = home_dir.as_posix() + sys.argv[1]
+    processed_path = home_dir.as_posix() + sys.argv[2]
+
+
 
     run_merge_csv_files(raw_path,merged_path)
     run_processed_data(merged_path, processed_path)
 
-    processed_data = pd.read_csv(processed_path + r'/processed_raw_data.csv')
+    processed_data = pd.read_csv(processed_path)
     
-    X = processed_data[['carrier', 'Trip_Type', 'Airport_Route', 'round_trip_duration',
+    X = processed_data[['carrier', 'Trip_Type', 'Airport_Route', 'round_trip_duration', 'stop',
        'Days_to_Fly', 'from_hour', 'flight_duration_value', 'Holiday',
        'Fly_WeekDay']]
     
@@ -281,35 +311,18 @@ def main():
 
    
     # K-fold cross-validation
-    kfold = KFold(n_splits=10, shuffle=True, random_state=42)
-    scores = cross_val_score(pipeline, X, Y, cv= kfold, scoring='r2')
+    # kfold = KFold(n_splits=2, shuffle=True, random_state=42)
+    # scores = cross_val_score(pipeline, X, Y, cv= kfold, scoring='r2')
 
-    print(scores.mean(),scores.std())
+    # print(scores.mean(),scores.std())
 
+    # X_train, X_test, y_train, y_test = train_test_split(X,Y,test_size=params['test_split'],random_state=params['seed'])
+    # pipeline.fit(X_train,y_train)
+    # y_pred = pipeline.predict(X_test)
+    # mae = mean_absolute_error(y_test,y_pred)
+    # print("mae is ",mae)
+    # r2 = r2_score(y_test, y_pred)
+    # print("R2 Score:", r2)
 
-
-    
-
-
-
-
-
-
-    # params_file = home_dir / 'params.yaml'
-    # params = yaml.safe_load(open(params_file))["make_dataset"]
-    # print(f'params is {params}')
-
-    # print(f'sys.argv is {sys.argv}')
-    # input_file = sys.argv[1]
-    # print(f'input_file is {input_file}')
-    # data_path = home_dir.as_posix()
-    # print(f'data_path id {data_path}')
-    # output_path = home_dir.as_posix()
-    # print(f'output_path is {output_path}')
-    # data = load_data(data_path)
-    # print(f'main data is {data.shape}')
-    # train_data, test_data = train_test_split(data, test_size=params['test_split'], random_state=params['seed'])
-    # print(f'train_data is {train_data.shape}')
-    # save_data(train_data, test_data, output_path)
 if __name__ == "__main__":
     main()

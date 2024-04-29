@@ -1,12 +1,12 @@
 schema: '2.0'
 stages:
   make_dataset:
-    cmd: python .\src\data\make_dataset.py /data/interim/merged_raw_data.csv
+    cmd: python .\src\data\make_dataset.py /data/interim/merged_raw_data.csv /data/processed/processed_raw_data.csv
     deps:
     - path: .\src\data\make_dataset.py
       hash: md5
-      md5: 553eadb593021ca124d8b138c4f367f3
-      size: 16081
+      md5: d1436a7e32d957005117e9fbe2aa46c7
+      size: 16617
     - path: data\interim\merged_raw_data.csv
       hash: md5
       md5: 373b4f9c4eac0a8f811b0ec50e7cc6a3
