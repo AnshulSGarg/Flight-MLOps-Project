@@ -1,34 +1,62 @@
+# name: CI Pipeline
+
+# on:
+#   push:
+
+# # permissions:
+# #   id-token: write
+# #   contents: read
+
+# jobs:
+#   integration:
+#     name: Continuous Integration
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Code
+#         uses: actions/checkout@v3
+
+#       - name: Set up python
+#         uses: actions/setup-python@v4
+#         with:
+#             python-version: 3.11
+
+#       - name: Install Dependencies
+#         run:  |
+#             python -m pip install --upgrade pip
+#             pip install -r requirements.txt
+        
+#       - name: Run main file
+#         run:  |
+#             python main.py
+
+#       - name: Run Test
+#         run: |
+#             python -m unittest discover
+
+
+
 name: CI Pipeline
 
 on:
   push:
 
-# permissions:
-#   id-token: write
-#   contents: read
-
 jobs:
-  integration:
-    name: Continuous Integration
+  bulid:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up python
-        uses: actions/setup-python@v4
-        with:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
             python-version: 3.11
+    - uses: iterative/setup-cml@v3
 
-      - name: Install Dependencies
-        run:  |
-            python -m pip install --upgrade pip
-            pip install -r requirements.txt
-        
-      - name: Run main file
-        run:  |
-            python main.py
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Run Test
-        run: |
-            python -m unittest discover
+    - name: Run main file
+      run: |
+        dvc repro
+
+
