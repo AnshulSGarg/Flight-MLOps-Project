@@ -1,6 +1,6 @@
 make_dataset:
-  test_split: 0.2
-  seed: 2023
+  test_split: 0.25
+  seed: 42
 train_model:
   seed: 21
   n_estimators: 50

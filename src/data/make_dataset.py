@@ -47,6 +47,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import r2_score
+from dvclive import Live
 import warnings
 
 # Ignore specific warning by category
@@ -58,10 +59,10 @@ def split_data(df, split, seed):
     train, test = train_test_split(df, split, seed)
     return train, test
 
-# def save_data(train, test, output_dir):
-#     pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
-#     train.to_csv(os.path.join(output_dir, 'train.csv'), index=False)
-#     test.to_csv(os.path.join(output_dir, 'test.csv'), index=False)
+def save_data(train, test, output_dir):
+    pathlib.Path(output_dir).mkdir(parents=True, exist_ok=True)
+    train.to_csv(os.path.join(output_dir, 'train.csv'), index=False)
+    test.to_csv(os.path.join(output_dir, 'test.csv'), index=False)
 
 def holiday():
     print('get all holidays in 2024')
@@ -248,11 +249,6 @@ def run_processed_data(merged_path, processed_path):
 columns_to_one_hot_encode = ['carrier','Trip_Type','Airport_Route', 'Holiday','from_hour','stop']
 columns_to_scale = ['round_trip_duration', 'Days_to_Fly', 'flight_duration_value']
 
-
-
-
-
-
 # print(f'input_file is {input_file}')
 # data_path = home_dir.as_posix()
 # print(f'data_path id {data_path}')
@@ -262,7 +258,7 @@ columns_to_scale = ['round_trip_duration', 'Days_to_Fly', 'flight_duration_value
 # print(f'main data is {data.shape}')
 # # train_data, test_data = train_test_split(data, test_size=params['test_split'], random_state=params['seed'])
 # print(f'train_data is {train_data.shape}')
-# save_data(train_data, test_data, output_path)
+
 
 
 
@@ -270,59 +266,134 @@ def main():
     curr_dir = pathlib.Path(__file__)
     home_dir = curr_dir.parent.parent.parent
 
-    # params_file = home_dir / 'params.yaml'
-    params_file = r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\params.yaml'
-    print(f'params_file is {params_file}')
-    print(yaml.safe_load(open(params_file)))
+    params_file = home_dir / 'params.yaml'
     params = yaml.safe_load(open(params_file))["make_dataset"]
-    print(f'params is {params}')
 
     raw_path = home_dir.as_posix() + r'/data/raw'
-    # merged_path = home_dir.as_posix() + r'/data/interim'
     merged_path = home_dir.as_posix() + sys.argv[1]
     processed_path = home_dir.as_posix() + sys.argv[2]
-
-
+    processed_test_train_path = home_dir.as_posix() + r'/data/processed'
 
     run_merge_csv_files(raw_path,merged_path)
-    run_processed_data(merged_path, processed_path)
-
+    run_processed_data(merged_path, processed_path) 
+       
     processed_data = pd.read_csv(processed_path)
-    
-    X = processed_data[['carrier', 'Trip_Type', 'Airport_Route', 'round_trip_duration', 'stop',
-       'Days_to_Fly', 'from_hour', 'flight_duration_value', 'Holiday',
-       'Fly_WeekDay']]
-    
-    Y = processed_data[['price_transformed']]
 
-        
+    train_data, test_data = train_test_split(processed_data,test_size=params['test_split'],random_state=params['seed'])
+    save_data(train_data, test_data, processed_test_train_path)
+
+    X_train = train_data[['carrier', 'Trip_Type', 'Airport_Route', 'round_trip_duration', 'stop',
+    'Days_to_Fly', 'from_hour', 'flight_duration_value', 'Holiday',
+    'Fly_WeekDay']]    
+    y_train = train_data[['price_transformed']]
+
+    y_train = np.ravel(y_train)
+
+    # # K-fold cross-validation
+    # kfold = KFold(n_splits=2, shuffle=True, random_state=42)
+    # scores = cross_val_score(pipeline, X, Y, cv= kfold, scoring='r2')
+    # print(scores.mean(),scores.std())
+
     preprocessor = ColumnTransformer(
-        transformers=[
-            ('num', StandardScaler(), columns_to_scale),
-            # ('cat', OrdinalEncoder(), columns_to_encode),
-            ('cat1',OneHotEncoder(drop='first'),columns_to_one_hot_encode)
-        ], 
-        remainder='passthrough'
-    )
+    transformers=[
+        ('num', StandardScaler(), columns_to_scale),
+        # ('cat', OrdinalEncoder(), columns_to_encode),
+        ('cat1',OneHotEncoder(drop='first'),columns_to_one_hot_encode)
+    ], 
+    remainder='passthrough')
 
     pipeline = Pipeline([
     ('preprocessor', preprocessor),
     ('regressor', RandomForestRegressor())])
-
-   
-    # K-fold cross-validation
-    # kfold = KFold(n_splits=2, shuffle=True, random_state=42)
-    # scores = cross_val_score(pipeline, X, Y, cv= kfold, scoring='r2')
-
-    # print(scores.mean(),scores.std())
-
-    # X_train, X_test, y_train, y_test = train_test_split(X,Y,test_size=params['test_split'],random_state=params['seed'])
+    
     # pipeline.fit(X_train,y_train)
     # y_pred = pipeline.predict(X_test)
     # mae = mean_absolute_error(y_test,y_pred)
     # print("mae is ",mae)
     # r2 = r2_score(y_test, y_pred)
     # print("R2 Score:", r2)
+
+    # Live.init("logs")
+
+    param_grid = {
+    # 'regressor__n_estimators': [100, 300],
+    'regressor__n_estimators': [100],
+    # 'regressor__max_depth': [None, 30],
+    # 'regressor__max_samples':[0.1, 0.5, 1.0],
+    # 'regressor__max_features': ['log2', 'sqrt', None]
+     'regressor__max_features': ['log2', 'sqrt']
+    }
+
+    kfold = KFold(n_splits=2, shuffle=True, random_state=42)
+    from sklearn.model_selection import RandomizedSearchCV
+
+    grid_search = RandomizedSearchCV(pipeline, param_grid, cv=kfold, scoring='r2', n_jobs=-1, verbose=4, n_iter=5)
+
+    # grid_search.fit(X_train, y_train)
+    # final_pipe = grid_search.best_estimator_
+
+
+
+    # # Initialize dvclive
+    # with Live() as live:
+    #     # Log parameter grid
+    #     live.log_params(param_grid)
+
+    #     # Track best score and parameters
+    #     live.log_metric("best_score", grid_search.best_score_)
+    #     # live.log_params("best_params", grid_search.best_params_)
+
+    #     # Track decision tree depth
+    #     tree_depths = [estimator.tree_.max_depth for estimator in final_pipe.named_steps['regressor'].estimators_]
+    #     # live.log_histogram('tree_depths', tree_depths)
+
+    #     hist, bin_edges = np.histogram(tree_depths, bins='auto')
+
+    #     # # Log histogram data
+    #     # live.log_metric("tree_depth_histogram", hist.tolist())
+
+    #     # # Log histogram bin edges
+    #     # live.log_metric("tree_depth_bin_edges", bin_edges.tolist())
+
+    #     # Track number of estimators
+    #     num_estimators = final_pipe.named_steps['regressor'].n_estimators
+    #     live.log_metric('num_estimators', num_estimators)
+
+    #     # Track feature importances
+    #     feature_importances = final_pipe.named_steps['regressor'].feature_importances_
+    #     live.log_plot('feature_importances', feature_importances)
+
+    #     # Visualize individual decision trees
+    #     from sklearn import tree
+    #     import matplotlib.pyplot as plt
+
+    #     # Choose an estimator from the final model
+    #     chosen_tree = final_pipe.named_steps['regressor'].estimators_[0]
+
+    #     # Visualize the tree
+    #     plt.figure(figsize=(20, 10))
+    #     tree.plot_tree(chosen_tree, filled=True)
+    #     plt.savefig("decision_tree_visualization.png")
+    #     plt.close()
+
+    #     # Log the visualization file
+    #     live.log_image("decision_tree_visualization", "decision_tree_visualization.png")
+
+    # # Save the logs
+    # Live.save("final")
+    # # search.best_params_
+    # # search.best_score_
+    # # # final_pipe.fit(X,Y)
+
+    # # with Live() as live:
+    # #     live.log_params(param_grid)
+    #     # live.log("best_score", grid_search.best_score_)
+    #     # live.log("best_params", grid_search.best_params_)
+
+    # # Finish dvclive logging
+    # # Live.save("final")
+
+
 
 if __name__ == "__main__":
     main()

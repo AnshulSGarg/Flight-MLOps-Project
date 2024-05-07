@@ -2,10 +2,18 @@ stages:
   make_dataset:
     cmd: python .\src\data\make_dataset.py /data/interim/merged_raw_data.csv /data/processed/processed_raw_data.csv
     deps:
-      - data\interim\merged_raw_data.csv
-      - .\src\data\make_dataset.py
-    # params:
-    #   - make_dataset.test_split
-    #   - make_dataset.seed
+    - data\interim\merged_raw_data.csv
+    - data\processed\processed_raw_data.csv
+    - .\src\data\make_dataset.py
+    params:
+    - make_dataset.test_split
+    - make_dataset.seed
     # outs:
     # - /data/processed/
+params:
+- dvclive/params.yaml
+metrics:
+- dvclive/metrics.json
+plots:
+- dvclive/plots/metrics:
+    x: step
