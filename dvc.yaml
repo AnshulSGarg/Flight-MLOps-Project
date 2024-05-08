@@ -5,8 +5,8 @@ stages:
     # - data\interim\merged_raw_data.csv
     # - data\processed\processed_raw_data.csv
     - .\src\data\make_dataset.py
-    - .\data\interim\merged_raw_data.csv
-    - .\data\processed\processed_raw_data.csv
+    # - .\data\interim\merged_raw_data.csv
+    # - .\data\processed\processed_raw_data.csv
     params:
     - make_dataset.test_split
     - make_dataset.seed
