@@ -3,19 +3,11 @@ stages:
   make_dataset:
     cmd: python .\src\data\make_dataset.py /data/interim/merged_raw_data.csv /data/processed/processed_raw_data.csv
     deps:
-    - path: .\data\interim\merged_raw_data.csv
-      hash: md5
-      md5: 373b4f9c4eac0a8f811b0ec50e7cc6a3
-      size: 82194894
-    - path: .\data\processed\processed_raw_data.csv
-      hash: md5
-      md5: bb7981e6701a555b825f6ed8cc7d1ec5
-      size: 13422754
     - path: .\src\data\make_dataset.py
       hash: md5
-      md5: aecc8437a3cf3248f0a708e01717a2ed
-      size: 19295
+      md5: 75f605207054f41d57bc9e225b60ea1e
+      size: 19203
     params:
       params.yaml:
-        make_dataset.seed: 43
-        make_dataset.test_split: 0.2
+        make_dataset.seed: 42
+        make_dataset.test_split: 0.25

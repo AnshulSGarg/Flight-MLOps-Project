@@ -329,69 +329,69 @@ def main():
 
     grid_search = RandomizedSearchCV(pipeline, param_grid, cv=kfold, scoring='r2', n_jobs=-1, verbose=4, n_iter=5)
 
-    # grid_search.fit(X_train, y_train)
-    # final_pipe = grid_search.best_estimator_
+    grid_search.fit(X_train, y_train)
+    final_pipe = grid_search.best_estimator_
 
 
 
-    # # Initialize dvclive
+    # Initialize dvclive
+    with Live() as live:
+        # Log parameter grid
+        live.log_params(param_grid)
+
+        # Track best score and parameters
+        live.log_metric("best_score", grid_search.best_score_)
+        # live.log_params("best_params", grid_search.best_params_)
+
+        # Track decision tree depth
+        tree_depths = [estimator.tree_.max_depth for estimator in final_pipe.named_steps['regressor'].estimators_]
+        # live.log_histogram('tree_depths', tree_depths)
+
+        hist, bin_edges = np.histogram(tree_depths, bins='auto')
+
+        # # Log histogram data
+        # live.log_metric("tree_depth_histogram", hist.tolist())
+
+        # # Log histogram bin edges
+        # live.log_metric("tree_depth_bin_edges", bin_edges.tolist())
+
+        # Track number of estimators
+        num_estimators = final_pipe.named_steps['regressor'].n_estimators
+        live.log_metric('num_estimators', num_estimators)
+
+        # Track feature importances
+        feature_importances = final_pipe.named_steps['regressor'].feature_importances_
+        live.log_plot('feature_importances', feature_importances)
+
+        # Visualize individual decision trees
+        from sklearn import tree
+        import matplotlib.pyplot as plt
+
+        # Choose an estimator from the final model
+        chosen_tree = final_pipe.named_steps['regressor'].estimators_[0]
+
+        # Visualize the tree
+        plt.figure(figsize=(20, 10))
+        tree.plot_tree(chosen_tree, filled=True)
+        plt.savefig("decision_tree_visualization.png")
+        plt.close()
+
+        # Log the visualization file
+        live.log_image("decision_tree_visualization", "decision_tree_visualization.png")
+
+    # Save the logs
+    Live.save("final")
+    # search.best_params_
+    # search.best_score_
+    # # final_pipe.fit(X,Y)
+
     # with Live() as live:
-    #     # Log parameter grid
     #     live.log_params(param_grid)
+        # live.log("best_score", grid_search.best_score_)
+        # live.log("best_params", grid_search.best_params_)
 
-    #     # Track best score and parameters
-    #     live.log_metric("best_score", grid_search.best_score_)
-    #     # live.log_params("best_params", grid_search.best_params_)
-
-    #     # Track decision tree depth
-    #     tree_depths = [estimator.tree_.max_depth for estimator in final_pipe.named_steps['regressor'].estimators_]
-    #     # live.log_histogram('tree_depths', tree_depths)
-
-    #     hist, bin_edges = np.histogram(tree_depths, bins='auto')
-
-    #     # # Log histogram data
-    #     # live.log_metric("tree_depth_histogram", hist.tolist())
-
-    #     # # Log histogram bin edges
-    #     # live.log_metric("tree_depth_bin_edges", bin_edges.tolist())
-
-    #     # Track number of estimators
-    #     num_estimators = final_pipe.named_steps['regressor'].n_estimators
-    #     live.log_metric('num_estimators', num_estimators)
-
-    #     # Track feature importances
-    #     feature_importances = final_pipe.named_steps['regressor'].feature_importances_
-    #     live.log_plot('feature_importances', feature_importances)
-
-    #     # Visualize individual decision trees
-    #     from sklearn import tree
-    #     import matplotlib.pyplot as plt
-
-    #     # Choose an estimator from the final model
-    #     chosen_tree = final_pipe.named_steps['regressor'].estimators_[0]
-
-    #     # Visualize the tree
-    #     plt.figure(figsize=(20, 10))
-    #     tree.plot_tree(chosen_tree, filled=True)
-    #     plt.savefig("decision_tree_visualization.png")
-    #     plt.close()
-
-    #     # Log the visualization file
-    #     live.log_image("decision_tree_visualization", "decision_tree_visualization.png")
-
-    # # Save the logs
+    # Finish dvclive logging
     # Live.save("final")
-    # # search.best_params_
-    # # search.best_score_
-    # # # final_pipe.fit(X,Y)
-
-    # # with Live() as live:
-    # #     live.log_params(param_grid)
-    #     # live.log("best_score", grid_search.best_score_)
-    #     # live.log("best_params", grid_search.best_params_)
-
-    # # Finish dvclive logging
-    # # Live.save("final")
 
 
 if __name__ == "__main__":
