@@ -17,5 +17,5 @@ stages:
       size: 13422754
     params:
       params.yaml:
-        make_dataset.seed: 42
-        make_dataset.test_split: 0.25
+        make_dataset.seed: 43
+        make_dataset.test_split: 0.2
