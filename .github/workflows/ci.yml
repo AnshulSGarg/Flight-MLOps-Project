@@ -40,39 +40,23 @@ name: CI Pipeline
 on:
   push:
 
-# jobs:
-#   bulid:
-#     runs-on: ubuntu-latest
-#     steps:
-#     - uses: actions/checkout@v4
-#     - uses: actions/setup-python@v5
-#       with:
-#             python-version: 3.11
-#     - uses: iterative/setup-cml@v3
-
-#     - name: Install Dependencies
-#       run: |
-#         python -m pip install --upgrade pip
-#         pip install -r requirements.txt
-
-#     # - name: Run main file
-#     #   run: |
-#     #     dvc repro
-
-
-
 jobs:
-  integration:
-    name: Continuous Integration
+  bulid:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - uses: actions/setup-python@v5
+      with:
+            python-version: 3.11
+    - uses: iterative/setup-cml@v3
 
-      - name: Lint code
-        run: echo "Linting repository"
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      - name: Run unit tests
-        run: echo "Running unit tests"
+    - name: Run main file
+      run: |
+        dvc repro
 
 
