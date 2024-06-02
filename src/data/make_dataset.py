@@ -48,6 +48,7 @@ from sklearn.model_selection import KFold, cross_val_score
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import r2_score
 from dvclive import Live
+import pickle
 import warnings
 
 # Ignore specific warning by category
@@ -395,6 +396,16 @@ def main():
         live.log_metric("mae", mae)
         live.log_metric("R2", r2)
     live.end()
+
+    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\flight_df.pkl', 'wb') as f:
+    # Dump the data into the pickle file
+        pickle.dump(processed_df, f)
+
+    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\flight_pipeline.pkl', 'wb') as f:
+    # Dump the data into the pickle file
+        pickle.dump(pipeline, f)
+
+
 
     # # Finish dvclive logging
     # Live.save("final")

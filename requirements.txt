@@ -8,7 +8,9 @@
 # awscli
 # flake8
 # python-dotenv
-pandas
-scikit-learn
+# pandas
+# scikit-learn
+# streamlit
+plotly
 # dvclive
 

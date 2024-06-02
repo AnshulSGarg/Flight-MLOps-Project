@@ -5,8 +5,8 @@ stages:
     deps:
     - path: .\src\data\make_dataset.py
       hash: md5
-      md5: 53d5c5e8f38926cef530508404679d17
-      size: 23190
+      md5: bdb9e2c917e29d7121cc9e0f766cb9a2
+      size: 23607
     - path: data\interim\merged_raw_data.csv
       hash: md5
       md5: 373b4f9c4eac0a8f811b0ec50e7cc6a3
@@ -18,4 +18,4 @@ stages:
     params:
       params.yaml:
         make_dataset.seed: 42
-        make_dataset.test_split: 0.25
+        make_dataset.test_split: 0.2
