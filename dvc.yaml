@@ -10,8 +10,6 @@ stages:
     - make_dataset.seed
     # outs:
     # - /data/processed/
-params:
-- dvclive/params.yaml
 metrics:
 - dvclive/metrics.json
 plots:

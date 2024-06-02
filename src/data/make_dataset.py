@@ -104,7 +104,14 @@ def run_processed_data(merged_path, processed_path):
 
     merged_df = pd.read_csv(merged_path)    
     
+    # drop columns with price value missing
     merged_df = merged_df[~merged_df['price'].isnull()]
+
+    # drop duplicate columns from source_df
+    merged_df = merged_df.drop_duplicates(keep='first')
+
+    merged_df['Report_Run_Time'] = pd.to_datetime(merged_df['Report_Run_Time'])
+    merged_df['Report_Run_Time'] = merged_df['Report_Run_Time'].dt.date
 
     merged_df.loc[merged_df['carrier'].str.contains('Separate tickets'), 'carrier'] = 'Third Party'
 
@@ -121,37 +128,53 @@ def run_processed_data(merged_path, processed_path):
 
     merged_df['City_Route'] = merged_df['From_City'] + " - " + merged_df['To_City']
 
+    merged_df['from_timestamp'] = pd.to_datetime(merged_df['from_timestamp']).dt.time
+    merged_df['to_timestamp'] = pd.to_datetime(merged_df['to_timestamp']).dt.time
+    # merged_df['to_hour'] = merged_df['to_timestamp'].apply(lambda x:x.hour)
+    # merged_df.loc[(merged_df['to_hour'] >= 0) & (merged_df['to_hour'] < 3),'to_hour_segment'] = '1. 12 AM - 3 AM'
+    # merged_df.loc[(merged_df['to_hour'] >= 3) & (merged_df['to_hour'] < 6),'to_hour_segment'] = '2. 3 AM - 6 AM'
+    # merged_df.loc[(merged_df['to_hour'] >= 6) & (merged_df['to_hour'] < 9),'to_hour_segment'] = '3. 6 AM - 9 AM'
+    # merged_df.loc[(merged_df['to_hour'] >= 9) & (merged_df['to_hour'] < 12),'to_hour_segment'] = '4. 9 AM - 12 PM'
+    # merged_df.loc[(merged_df['to_hour'] >= 12) & (merged_df['to_hour'] < 15),'to_hour_segment'] = '5. 12 PM - 3 PM'
+    # merged_df.loc[(merged_df['to_hour'] >= 15) & (merged_df['to_hour'] < 18),'to_hour_segment'] = '6. 3 PM - 6 PM'
+    # merged_df.loc[(merged_df['to_hour'] >= 18) & (merged_df['to_hour'] < 21),'to_hour_segment'] = '7. 6 PM - 9 PM'
+    # merged_df.loc[(merged_df['to_hour'] >= 21) & (merged_df['to_hour'] < 24),'to_hour_segment'] = '8. 9 PM - 12 AM'
+
+    merged_df['from_date'] = pd.to_datetime(merged_df['from_date'] + ' 2024', format='%b %d %Y')
+    merged_df['to_date'] = pd.to_datetime(merged_df['to_date'] + ' 2024', format='%b %d %Y')
+
+    merged_df['from_timestamp_1'] = pd.to_datetime(merged_df['from_date']) + pd.to_timedelta(merged_df['from_timestamp'].astype(str))
+    merged_df['to_timestamp_1'] = pd.to_datetime(merged_df['to_date']) + pd.to_timedelta(merged_df['to_timestamp'].astype(str))
+
+    # merged_df['from_hour'] = merged_df['from_timestamp'].apply(lambda x:x.hour)
+    # merged_df['from_timestamp_1'] = pd.to_datetime(merged_df['from_timestamp_1'])
+    merged_df['from_hour'] = merged_df['from_timestamp_1'].dt.round('15min').dt.strftime('%H:%M')
+    # merged_df['from_date'] = pd.to_datetime(merged_df['from_date'] + ' 2024', format='%b %d %Y')
+    merged_df['to_hour'] = merged_df['to_timestamp'].apply(lambda x:x.hour)
+    # merged_df['to_date'] = pd.to_datetime(merged_df['to_date'] + ' 2024', format='%b %d %Y')
+
+    merged_df['flight_duration'] = merged_df['to_timestamp_1'] - merged_df['from_timestamp_1']
+    merged_df.loc[merged_df['flight_duration'].dt.total_seconds() < 0, 'to_timestamp_1'] += pd.to_timedelta('1 day')
+    merged_df['flight_duration'] = merged_df['to_timestamp_1'] - merged_df['from_timestamp_1']
+    
     merged_df[['Hours', 'Minutes']] = merged_df['details'].str.extract(r'Total duration (\d+) hr(?: (\d+) min)?')
     merged_df['Minutes'] = merged_df['Minutes'].fillna(0).astype(int)
     merged_df['Hours'] = pd.to_numeric(merged_df['Hours'])
     merged_df['Minutes'] = pd.to_numeric(merged_df['Minutes'])
     merged_df['Flight_Time'] = merged_df['Hours'] + round(merged_df['Minutes']/60,1)
 
-    merged_df['from_timestamp'] = pd.to_datetime(merged_df['from_timestamp']).dt.time
-    merged_df['to_timestamp'] = pd.to_datetime(merged_df['to_timestamp']).dt.time
-
-    merged_df['from_hour'] = merged_df['from_timestamp'].apply(lambda x:x.hour)
-    merged_df['from_date'] = pd.to_datetime(merged_df['from_date'] + ' 2024', format='%b %d %Y')
-    merged_df['to_hour'] = merged_df['to_timestamp'].apply(lambda x:x.hour)
-    merged_df['to_date'] = pd.to_datetime(merged_df['to_date'] + ' 2024', format='%b %d %Y')
-
     holiday_df = holiday()
     merged_df.loc[merged_df['from_date'].isin(holiday_df['Holiday']),'Holiday'] = 'Holiday'
     merged_df.loc[~merged_df['from_date'].isin(holiday_df['Holiday']),'Holiday'] = 'Not_Holiday'
+
     merged_df['Days_to_Fly'] = merged_df['from_date'] - pd.to_datetime(merged_df['Report_Run_Time'])
     merged_df['Days_to_Fly'] = merged_df['Days_to_Fly'].dt.days
 
-    merged_df['from_timestamp_1'] = pd.to_datetime(merged_df['from_date']) + pd.to_timedelta(merged_df['from_timestamp'].astype(str))
-    merged_df['to_timestamp_1'] = pd.to_datetime(merged_df['to_date']) + pd.to_timedelta(merged_df['to_timestamp'].astype(str))
-
-    merged_df['flight_duration'] = merged_df['to_timestamp_1'] - merged_df['from_timestamp_1']
+    # merged_df['flight_duration'] = merged_df['to_timestamp_1'] - merged_df['from_timestamp_1']
     merged_df['flight_duration_value'] = round(merged_df.flight_duration.dt.seconds/3600,1)
-
     merged_df.loc[merged_df['City_Route']=='New York City - Los Angeles', 'flight_duration_value'] = merged_df['flight_duration_value'] + 3
     merged_df.loc[merged_df['City_Route']=='Los Angeles - New York City', 'flight_duration_value'] = merged_df['flight_duration_value'] - 3
-
     merged_df.loc[merged_df['Flight_Time'].isnull(),'Flight_Time'] = merged_df['flight_duration_value']
-
     merged_df['Fly_WeekDay'] = merged_df['from_timestamp_1'].dt.weekday + 1
 
     merged_df.loc[~merged_df['carbon_emission'].str.contains('emissions'),'carbon_emission'] = ""
@@ -191,22 +214,30 @@ def run_processed_data(merged_path, processed_path):
     merged_df.loc[merged_df['overhead_bin'].str.contains("doesn't include overhead bin access"), 'overhead_bin'] = 'Additional charge for overhead bin'
     merged_df.loc[merged_df['overhead_bin'].str.startswith("$"), 'overhead_bin'] = 'No additional charge for overhead bin'
 
-    # merged_df.loc[merged_df['layover'].str.contains("(1 of 3)", na=False), 'layover_count'] = 3
-    # merged_df.loc[merged_df['layover'].str.contains("(1 of 2)", na=False), 'layover_count'] = 2
-    # merged_df.loc[merged_df['layover'].str.contains("(1 of 1)", na=False), 'layover_count'] = 1
-    # merged_df['layover_count'] = merged_df['layover_count'].fillna(0)
+    # merged_df.loc[merged_df['layover'].str.contains("(1 of 3)", na=False), 'stop'] = 3
+    # merged_df.loc[merged_df['layover'].str.contains("(1 of 2)", na=False), 'stop'] = 2
+    # merged_df.loc[merged_df['layover'].str.contains("(1 of 1)", na=False), 'stop'] = 1
+    # merged_df['stop'] = merged_df['stop'].fillna(0)
 
     merged_df.loc[merged_df.round_trip_duration == 0, 'Trip_Type'] = 'One Way'
     merged_df.loc[merged_df.round_trip_duration > 0, 'Trip_Type'] = 'Rounds Trip'
 
     merged_df = merged_df[['Report_Run_Time', 'carrier', 'Trip_Type', 
                            'Airport_Route','City_Route'
-                        #    ,'layover_count', 'from_hour_segment', 'to_hour_segment'
+                        #    ,'stop', 'from_hour_segment', 'to_hour_segment'
                         ,'from_timestamp_1', 'to_timestamp_1', 
                          'flight_duration_value', 'Fly_WeekDay',
                          'stop', 'price','overhead_bin', 'round_trip_duration',
        'Carbon emissions estimate num', 'carbon_emission% num','Days_to_Fly','Holiday']]
+    
     merged_df = merged_df.drop_duplicates(keep='first')
+
+    # merged_df = merged_df[['Report_Run_Time', 'carrier', 'Trip_Type', 'Airport_Route',
+    #      'price', 'overhead_bin','stop',
+    #    'round_trip_duration', 'Carbon emissions estimate num',
+    #    'carbon_emission% num', 'Days_to_Fly', 'from_timestamp_1',
+    # #    'to_timestamp_1', 'from_hour_segment', 'to_hour_segment',
+    #    'flight_duration_value','Holiday','Fly_WeekDay']]
 
     train_carbon_df = merged_df[~(merged_df['Carbon emissions estimate num'].isnull()) 
                          & ~(merged_df['carbon_emission% num'].isnull())][['Carbon emissions estimate num','carbon_emission% num']]
@@ -227,26 +258,22 @@ def run_processed_data(merged_path, processed_path):
     merged_df.loc[merged_df['Carbon emissions estimate num'].isnull(), 'Carbon emissions estimate num'] = merged_df['Carbon emissions estimate num pred']
     merged_df = merged_df[~merged_df['Carbon emissions estimate num'].isnull()]
     merged_df = merged_df[['Report_Run_Time', 'carrier', 'Trip_Type', 'Airport_Route',
-       'price', 'overhead_bin',
-        #  'layover_count', 'from_hour_segment', 'to_hour_segment',
-           'round_trip_duration', 'Carbon emissions estimate num', 'carbon_emission% num',
-             'Days_to_Fly', 'from_timestamp_1', 'to_timestamp_1',
-               'flight_duration_value', 'Holiday', 'Fly_WeekDay', 'stop']]
+   'price', 'overhead_bin',
+   #  'stop', 'from_hour_segment', 'to_hour_segment',
+      'round_trip_duration', 'Carbon emissions estimate num', 'carbon_emission% num',
+         'Days_to_Fly', 'from_timestamp_1', 'to_timestamp_1',
+         'flight_duration_value', 'Holiday', 'Fly_WeekDay', 'stop']]
     
-
     merged_df['from_hour'] = merged_df['from_timestamp_1'].dt.round('15min').dt.strftime('%H:%M')
     
     merged_df = merged_df[[ 'carrier', 'Trip_Type','Airport_Route',
           'stop','round_trip_duration','Days_to_Fly',
      'from_hour', 'flight_duration_value',
         'Holiday', 'Fly_WeekDay', 'price']]
-
     merged_df = merged_df.drop_duplicates(keep='first')
-    merged_df = merged_df[merged_df['flight_duration_value']<=16.5]
-    merged_df['price_transformed'] = np.log(merged_df['price'])
     merged_df.to_csv(processed_path)
 
-columns_to_one_hot_encode = ['carrier','Trip_Type','Airport_Route', 'Holiday','from_hour','stop']
+columns_to_encode = ['carrier','Trip_Type','Airport_Route','stop','Holiday','from_hour','Fly_WeekDay']
 columns_to_scale = ['round_trip_duration', 'Days_to_Fly', 'flight_duration_value']
 
 # print(f'input_file is {input_file}')
@@ -271,127 +298,167 @@ def main():
 
     raw_path = home_dir.as_posix() + r'/data/raw'
     merged_path = home_dir.as_posix() + sys.argv[1]
+    
     processed_path = home_dir.as_posix() + sys.argv[2]
     processed_test_train_path = home_dir.as_posix() + r'/data/processed'
 
     run_merge_csv_files(raw_path,merged_path)
     run_processed_data(merged_path, processed_path) 
        
-    processed_data = pd.read_csv(processed_path)
+    processed_df = pd.read_csv(processed_path, index_col=False)
 
-    train_data, test_data = train_test_split(processed_data,test_size=params['test_split'],random_state=params['seed'])
-    save_data(train_data, test_data, processed_test_train_path)
 
-    X_train = train_data[['carrier', 'Trip_Type', 'Airport_Route', 'round_trip_duration', 'stop',
-    'Days_to_Fly', 'from_hour', 'flight_duration_value', 'Holiday',
-    'Fly_WeekDay']]    
-    y_train = train_data[['price_transformed']]
+    processed_df = processed_df[(processed_df['Days_to_Fly']>1)]
+    # df = df[(df['Days_to_Fly']<76)]
+    processed_df = processed_df[(processed_df['flight_duration_value'] > 4.4)]
+    processed_df = processed_df[(processed_df['flight_duration_value'] < 12)]
+    processed_df = processed_df[~(processed_df['carrier'].isin(['Third Party', 'Frontier', 'Sun Country Airlines']))]
+    processed_df = processed_df[processed_df['price']<1000]
 
-    y_train = np.ravel(y_train)
+    # y_train = np.ravel(y_train)
 
-    # # K-fold cross-validation
-    # kfold = KFold(n_splits=2, shuffle=True, random_state=42)
-    # scores = cross_val_score(pipeline, X, Y, cv= kfold, scoring='r2')
-    # print(scores.mean(),scores.std())
+    # # # K-fold cross-validation
+    # # kfold = KFold(n_splits=2, shuffle=True, random_state=42)
+    # # scores = cross_val_score(pipeline, X, Y, cv= kfold, scoring='r2')
+    # # print(scores.mean(),scores.std())
 
     preprocessor = ColumnTransformer(
-    transformers=[
-        ('num', StandardScaler(), columns_to_scale),
-        # ('cat', OrdinalEncoder(), columns_to_encode),
-        ('cat1',OneHotEncoder(drop='first'),columns_to_one_hot_encode)
-    ], 
-    remainder='passthrough')
+        transformers=[
+            ('num', StandardScaler(),columns_to_scale),
+            # ('cat', OrdinalEncoder(), columns_to_encode)
+            ('cat', OneHotEncoder(), columns_to_encode)
+        ],
+        remainder='passthrough'
+)
 
+    # Creating a pipeline
     pipeline = Pipeline([
-    ('preprocessor', preprocessor),
-    ('regressor', RandomForestRegressor())])
-    
-    # pipeline.fit(X_train,y_train)
-    # y_pred = pipeline.predict(X_test)
+        ('preprocessor', preprocessor),
+        ('regressor', RandomForestRegressor())
+    ])
+    pipeline
+
+    # X_train = train_data[['carrier', 'Trip_Type', 'Airport_Route', 'round_trip_duration', 'stop',
+    # 'Days_to_Fly', 'from_hour', 'flight_duration_value', 'Holiday',
+    # 'Fly_WeekDay']]    
+    # y_train = train_data[['price']]
+
+    X = processed_df[['carrier', 'Trip_Type', 'Airport_Route', 'stop',
+       'round_trip_duration', 'Days_to_Fly', 'from_hour',
+       'flight_duration_value', 'Holiday', 'Fly_WeekDay']]
+    y = processed_df[['price']]
+
+    train_data, test_data = train_test_split(processed_df,test_size=params['test_split'],random_state=params['seed'])
+    save_data(train_data, test_data, processed_test_train_path)
+
+    X_train = train_data[['carrier', 'Trip_Type', 'Airport_Route', 'stop',
+       'round_trip_duration', 'Days_to_Fly', 'from_hour',
+       'flight_duration_value', 'Holiday', 'Fly_WeekDay']]
+    y_train = train_data[['price']]
+    X_test = test_data[['carrier', 'Trip_Type', 'Airport_Route', 'stop',
+       'round_trip_duration', 'Days_to_Fly', 'from_hour',
+       'flight_duration_value', 'Holiday', 'Fly_WeekDay']]
+    y_test = test_data[['price']]
+
+    # X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, random_state= 42)
+    pipeline.fit(X_train, np.log1p(y_train))
+    y_pred = pipeline.predict(X_test)
+  
+    mae = mean_absolute_error(y_test[['price']],np.expm1(y_pred))
     # mae = mean_absolute_error(y_test,y_pred)
-    # print("mae is ",mae)
-    # r2 = r2_score(y_test, y_pred)
-    # print("R2 Score:", r2)
+    print(f'mae is {mae}')
+    r2 = r2_score(y_test[['price']],np.expm1(y_pred))
+    # r2 = r2_score(y_test,y_pred)
+    print("R2:", round(r2,2))
 
-    # Live.init("logs")
+    # # Live.init("logs")
 
-    param_grid = {
-    # 'regressor__n_estimators': [100, 300],
-    'regressor__n_estimators': [100],
-    # 'regressor__max_depth': [None, 30],
-    # 'regressor__max_samples':[0.1, 0.5, 1.0],
-    # 'regressor__max_features': ['log2', 'sqrt', None]
-     'regressor__max_features': ['log2', 'sqrt']
-    }
+    # param_grid = {
+    # # 'regressor__n_estimators': [100, 300],
+    # 'regressor__n_estimators': [100],
+    # # 'regressor__max_depth': [None, 30],
+    # # 'regressor__max_samples':[0.1, 0.5, 1.0],
+    # # 'regressor__max_features': ['log2', 'sqrt', None]
+    #  'regressor__max_features': ['log2', 'sqrt']
+    # }
 
-    kfold = KFold(n_splits=2, shuffle=True, random_state=42)
-    from sklearn.model_selection import RandomizedSearchCV
+    # kfold = KFold(n_splits=2, shuffle=True, random_state=42)
+    # from sklearn.model_selection import RandomizedSearchCV
 
-    grid_search = RandomizedSearchCV(pipeline, param_grid, cv=kfold, scoring='r2', n_jobs=-1, verbose=4, n_iter=5)
+    # grid_search = RandomizedSearchCV(pipeline, param_grid, cv=kfold, scoring='r2', n_jobs=-1, verbose=4, n_iter=5)
 
-    grid_search.fit(X_train, y_train)
-    final_pipe = grid_search.best_estimator_
+    # grid_search.fit(X_train, y_train)
+    # final_pipe = grid_search.best_estimator_
 
-
-
-    # Initialize dvclive
     with Live() as live:
-        # Log parameter grid
-        live.log_params(param_grid)
+        # live.log_params(param_grid)
+        live.log_metric("mae", mae)
+        live.log_metric("R2", r2)
+    live.end()
 
-        # Track best score and parameters
-        live.log_metric("best_score", grid_search.best_score_)
-        # live.log_params("best_params", grid_search.best_params_)
-
-        # Track decision tree depth
-        tree_depths = [estimator.tree_.max_depth for estimator in final_pipe.named_steps['regressor'].estimators_]
-        # live.log_histogram('tree_depths', tree_depths)
-
-        hist, bin_edges = np.histogram(tree_depths, bins='auto')
-
-        # # Log histogram data
-        # live.log_metric("tree_depth_histogram", hist.tolist())
-
-        # # Log histogram bin edges
-        # live.log_metric("tree_depth_bin_edges", bin_edges.tolist())
-
-        # Track number of estimators
-        num_estimators = final_pipe.named_steps['regressor'].n_estimators
-        live.log_metric('num_estimators', num_estimators)
-
-        # Track feature importances
-        feature_importances = final_pipe.named_steps['regressor'].feature_importances_
-        live.log_plot('feature_importances', feature_importances)
-
-        # Visualize individual decision trees
-        from sklearn import tree
-        import matplotlib.pyplot as plt
-
-        # Choose an estimator from the final model
-        chosen_tree = final_pipe.named_steps['regressor'].estimators_[0]
-
-        # Visualize the tree
-        plt.figure(figsize=(20, 10))
-        tree.plot_tree(chosen_tree, filled=True)
-        plt.savefig("decision_tree_visualization.png")
-        plt.close()
-
-        # Log the visualization file
-        live.log_image("decision_tree_visualization", "decision_tree_visualization.png")
-
-    # Save the logs
-    Live.save("final")
-    # search.best_params_
-    # search.best_score_
-    # # final_pipe.fit(X,Y)
-
-    # with Live() as live:
-    #     live.log_params(param_grid)
-        # live.log("best_score", grid_search.best_score_)
-        # live.log("best_params", grid_search.best_params_)
-
-    # Finish dvclive logging
+    # # Finish dvclive logging
     # Live.save("final")
+
+
+
+    # # Initialize dvclive
+    # with Live() as live:
+    #     # Log parameter grid
+    #     live.log_params(param_grid)
+
+    #     # Track best score and parameters
+    #     live.log_metric("best_score", grid_search.best_score_)
+    #     # live.log_params("best_params", grid_search.best_params_)
+
+    #     # Track decision tree depth
+    #     tree_depths = [estimator.tree_.max_depth for estimator in final_pipe.named_steps['regressor'].estimators_]
+    #     # live.log_histogram('tree_depths', tree_depths)
+
+    #     hist, bin_edges = np.histogram(tree_depths, bins='auto')
+
+    #     # # Log histogram data
+    #     # live.log_metric("tree_depth_histogram", hist.tolist())
+
+    #     # # Log histogram bin edges
+    #     # live.log_metric("tree_depth_bin_edges", bin_edges.tolist())
+
+    #     # Track number of estimators
+    #     num_estimators = final_pipe.named_steps['regressor'].n_estimators
+    #     live.log_metric('num_estimators', num_estimators)
+
+    #     # Track feature importances
+    #     feature_importances = final_pipe.named_steps['regressor'].feature_importances_
+    #     live.log_plot('feature_importances', feature_importances)
+
+    #     # Visualize individual decision trees
+    #     from sklearn import tree
+    #     import matplotlib.pyplot as plt
+
+    #     # Choose an estimator from the final model
+    #     chosen_tree = final_pipe.named_steps['regressor'].estimators_[0]
+
+    #     # Visualize the tree
+    #     plt.figure(figsize=(20, 10))
+    #     tree.plot_tree(chosen_tree, filled=True)
+    #     plt.savefig("decision_tree_visualization.png")
+    #     plt.close()
+
+    #     # Log the visualization file
+    #     live.log_image("decision_tree_visualization", "decision_tree_visualization.png")
+
+    # # Save the logs
+    # Live.save("final")
+    # # search.best_params_
+    # # search.best_score_
+    # # # final_pipe.fit(X,Y)
+
+    # # with Live() as live:
+    # #     live.log_params(param_grid)
+    #     # live.log("best_score", grid_search.best_score_)
+    #     # live.log("best_params", grid_search.best_params_)
+
+    # # Finish dvclive logging
+    # # Live.save("final")
 
 
 if __name__ == "__main__":
