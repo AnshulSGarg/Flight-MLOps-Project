@@ -8,10 +8,10 @@ def Price_Prediction():
     st.title("Price Prediction")
     st.header("Enter Input")
 
-    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\flight_df.pkl','rb') as file:
+    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_df.pkl','rb') as file:
         df = pickle.load(file)
 
-    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\flight_pipeline.pkl','rb') as file:
+    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_pipeline.pkl','rb') as file:
         pipeline = pickle.load(file)
 
     from pandas.tseries.holiday import USFederalHolidayCalendar
@@ -48,7 +48,7 @@ def Price_Prediction():
         
         # merged_df['from_hour'] = merged_df['from_timestamp_1'].dt.round('15min').dt.strftime('%H:%M')
 
-        flight_duration_value = st.selectbox('Flight Duration (hour)',[float(i/2) for i in range(9, 34)])
+        flight_duration_value = st.selectbox('Flight Duration (hour)',[float(i/2) for i in range(10, 25)])
 
     with col2:
         # Trip_Type = st.selectbox('Trip_Type', df['Trip_Type'].unique().tolist())
@@ -120,10 +120,12 @@ def Price_Prediction():
     one_df = pd.DataFrame(data, columns=columns)
 
     # print(one_df)
-    st.dataframe(one_df)
+    # st.dataframe(one_df)
 
     if st.button('Predict Price'):
         prediction = pipeline.predict(one_df)
         prediction = np.expm1(prediction)
-        st.text('Prediction is {}'.format(round(prediction[0])))
+        lower_bound = round(prediction[0]) - 30
+        upper_bound = round(prediction[0]) + 30
+        st.text('Prediction price should be between ${} and ${}'.format(lower_bound,upper_bound))
 

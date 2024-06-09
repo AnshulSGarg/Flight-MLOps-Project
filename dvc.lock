@@ -5,8 +5,8 @@ stages:
     deps:
     - path: .\src\data\make_dataset.py
       hash: md5
-      md5: bdb9e2c917e29d7121cc9e0f766cb9a2
-      size: 23607
+      md5: 5a42c492a61c6594e5921469e3cf76cf
+      size: 23643
     - path: data\interim\merged_raw_data.csv
       hash: md5
       md5: 373b4f9c4eac0a8f811b0ec50e7cc6a3
