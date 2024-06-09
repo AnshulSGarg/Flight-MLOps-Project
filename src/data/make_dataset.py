@@ -362,9 +362,11 @@ def main():
     y_test = test_data[['price']]
 
     # X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2, random_state= 42)
+    print('training model')
     pipeline.fit(X_train, np.log1p(y_train))
     y_pred = pipeline.predict(X_test)
-  
+    
+    print('making prediction')
     mae = mean_absolute_error(y_test[['price']],np.expm1(y_pred))
     # mae = mean_absolute_error(y_test,y_pred)
     print(f'mae is {mae}')
