@@ -1,4 +1,5 @@
 [core]
     remote = my_remote
+    autostage = true
 ['remote "my_remote"']
     url = C:\Users\anshu\Desktop\Temp-folder\flight-mlops-storage
