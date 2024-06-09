@@ -397,14 +397,14 @@ def main():
         live.log_metric("R2", r2)
     live.end()
 
-    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_df.pkl', 'wb') as f:
+    # with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_df.pkl', 'wb') as f:
         
-    # Dump the data into the pickle file
-        pickle.dump(processed_df, f)
+    # # Dump the data into the pickle file
+    #     pickle.dump(processed_df, f)
 
-    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_pipeline.pkl', 'wb') as f:
-    # Dump the data into the pickle file
-        pickle.dump(pipeline, f)
+    # with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_pipeline.pkl', 'wb') as f:
+    # # Dump the data into the pickle file
+    #     pickle.dump(pipeline, f)
 
 
 
