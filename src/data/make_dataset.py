@@ -421,15 +421,15 @@ def main():
         live.log_metric("R2", r2)
     live.end()
 
-    # print(r'saving flight_df pickle file')
-    # with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_df.pkl', 'wb') as f:   
-    # # Dump the data into the pickle file
-    #     pickle.dump(processed_df, f)
+    print(r'saving flight_df pickle file')
+    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_df.pkl', 'wb') as f:   
+    # Dump the data into the pickle file
+        pickle.dump(processed_df, f)
 
-    # print(r'saving flight_pipeline pickle file')
-    # with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_pipeline.pkl', 'wb') as f:
-    # # Dump the data into the pickle file
-    #     pickle.dump(pipeline, f)
+    print(r'saving flight_pipeline pickle file')
+    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_pipeline.pkl', 'wb') as f:
+    # Dump the data into the pickle file
+        pickle.dump(pipeline, f)
 
 
 
