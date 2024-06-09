@@ -1,6 +1,0 @@
-outs:
-- md5: eca74563bbb324b3000602fe886f0b24.dir
-  size: 716629492
-  nfiles: 3
-  hash: md5
-  path: pickle_files
