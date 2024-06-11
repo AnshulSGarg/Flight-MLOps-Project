@@ -1,11 +1,10 @@
 import streamlit as st
 from price_prediction import Price_Prediction
 from analytics_module import analysis
-# Landing Page
-def landing_page():
-    st.title("Welcome to My Flight App")
-    st.write("This is the landing page of the app.")
-    # Add any content or widgets you want on the landing page
+from home_page import landing_page
+
+
+st.set_page_config(layout="wide")  # Set the layout to wide mode
 
 # Page 1
 def Prediction():
