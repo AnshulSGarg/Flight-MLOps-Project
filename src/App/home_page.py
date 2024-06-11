@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 def landing_page():    
     st.markdown("""
     <div style='text-align: center;'>
-        <h5 style='margin: 0; padding: 0; text-align: left; margin-left: 430px;'>Welcome to</h5>
+        <h5 style='margin: 0; padding: 0; text-align: left; margin-left: 450px;'>Welcome to</h5>
         <h1 style='color: #1e90ff; margin: 0; padding: 0;'>JetPredict</h1>
         <h4 style='color: #6fa8dc; margin: 0; padding: 0;'>Smart Predictions and Travel Insights App</h4>
     </div>
@@ -18,24 +18,14 @@ def landing_page():
     col1, col2 = st.columns([1, 1])  # Adjust the width ratio to equal columns
 
     with col1:
+        st.text(" \n")
+        st.text(" \n")
+        st.text(" \n")
+        st.text(" \n")
         st.write("""
-            ##### Description
+            ##### _Description_
             JetPredict is the ultimate platform for predicting flight fares, initially targeting New York to Los Angeles routes while exploring possibilities for expansion to other destinations. 
-            This project stemmed from my passion for data science and my desire to apply my knowledge in a practical and impactful manner.
-
-            ###### Analytics Module:
-            Gain insights into historical flight data trends and patterns. Explore pricing variations and other factors influencing fares through advanced analytics tools.
-
-            ###### Prediction Module:
-            Predict future flight fares accurately using machine learning algorithms. Consider factors like departure time, airline, and historical data to plan your travel budget.
-
-            ###### Insight Module:
-            Explore detailed analysis derived from predictive models. Understand fare fluctuations and identify optimal booking windows for the best deals.
-
-            ###### Recommendation Module:
-            Receive personalized flight recommendations based on your preferences and budget. Utilize machine learning techniques to discover cost-effective travel options.
-
-            Whether you're a frequent traveler, budget-conscious adventurer, or data enthusiast, JetPredict offers tools to meet your needs. Experience the future of flight fare prediction and analysis with JetPredict today!""")
+            This project stemmed from my passion for data science and my desire to apply my knowledge in a practical and impactful manner.""")
 
     with col2:
         def analysis():
@@ -63,8 +53,8 @@ def landing_page():
 
             fig = px.scatter_mapbox(highlight_df, lat="latitude", lon="longitude",
                                     color_discrete_sequence=["red"],
-                                    size='marker_size', zoom=2.5,  # Adjust zoom level
-                                    mapbox_style="open-street-map", width=450, height=450, hover_name="airport")  # Adjust width and height
+                                    size='marker_size', zoom=1.5,  # Adjust zoom level
+                                    mapbox_style="open-street-map", width=20, height=300, hover_name="airport")  # Adjust width and height
             fig.update_layout(mapbox=dict(center=dict(lat=center_lat, lon=center_lon)),
                               showlegend=False)  # Hide the legend
 
@@ -84,3 +74,40 @@ def landing_page():
 
         # Run the analysis function
         analysis()
+
+    col1, col2 = st.columns([1, 1])  # Adjust the width ratio to equal columns
+
+    with col1:
+        st.write("""
+            ###### _Analytics Module_:
+            - Gain insights into historical flight data trends and patterns. 
+            - Explore pricing variations and other factors influencing fares through advanced analytics tools.""")
+        
+        st.text(" \n")
+        st.text(" \n")
+
+        st.write("""
+            ###### _Prediction Module_:
+            - Predict future flight fares accurately using machine learning algorithms. 
+            - Consider factors like departure time, airline, and historical data to plan your travel budget.""")
+
+    with col2:
+        st.write("""
+            ###### _Insight Module_:
+            - Explore detailed analysis derived from predictive models. 
+            - Understand fare fluctuations and identify optimal booking windows for the best deals.""")
+                 
+        st.text(" \n")
+        st.text(" \n")
+
+        st.write("""
+            ###### _Recommendation Module_:
+            - Receive personalized flight recommendations based on your preferences and budget. 
+            - Utilize machine learning techniques to discover cost-effective travel options.""")
+        
+        st.text(" \n")
+        st.text(" \n")
+
+    st.write("""
+            Whether you're a frequent traveler, budget-conscious adventurer, or data enthusiast, JetPredict offers tools to meet your needs. 
+             Experience the future of flight fare prediction and analysis with JetPredict today!""")
