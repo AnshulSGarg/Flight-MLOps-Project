@@ -130,12 +130,16 @@ def Price_Prediction():
     trend_df = pd.concat([trend_df, pd.DataFrame(new_rows)], ignore_index=True)
     trend_df = trend_df.drop(trend_df.index[0])
     # st.dataframe(trend_df)
+    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\one_df.pkl', 'wb') as f:
+        pickle.dump(one_df, f)
 
 
     if st.button('Predict Price'):
     # Make a prediction
         prediction = pipeline.predict(one_df)
         prediction = np.expm1(prediction)
+        with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\predicted_price.pkl', 'wb') as f:
+            pickle.dump(prediction, f)
         lower_bound = round(prediction[0]) - 30
         upper_bound = round(prediction[0]) + 30
         st.text('Prediction price should be between ${} and ${}'.format(lower_bound, upper_bound))

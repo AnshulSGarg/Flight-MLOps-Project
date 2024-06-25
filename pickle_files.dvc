@@ -1,6 +1,6 @@
 outs:
-- md5: bbbcd87458831f04f7ed73eaefe33dc3.dir
-  size: 716416046
-  nfiles: 2
+- md5: b0fba8b11dd04654660a167d3a193d21.dir
+  size: 9280700
+  nfiles: 4
   hash: md5
   path: pickle_files
