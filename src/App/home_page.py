@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 def landing_page():    
     st.markdown("""
     <div style='text-align: center;'>
-        <h5 style='margin: 0; padding: 0; text-align: left; margin-left: 450px;'>Welcome to</h5>
+        <h5 style='margin: 0; padding: 0;'>Welcome to</h5>
         <h1 style='color: #1e90ff; margin: 0; padding: 0;'>JetPredict</h1>
         <h4 style='color: #6fa8dc; margin: 0; padding: 0;'>Smart Predictions and Travel Insights App</h4>
     </div>
@@ -87,23 +87,24 @@ def landing_page():
         st.text(" \n")
 
         st.write("""
-            ###### _Prediction Module_:
-            - Predict future flight fares accurately using machine learning algorithms. 
-            - Consider factors like departure time, airline, and historical data to plan your travel budget.""")
-
-    with col2:
-        st.write("""
             ###### _Insight Module_:
             - Explore detailed analysis derived from predictive models. 
             - Understand fare fluctuations and identify optimal booking windows for the best deals.""")
-                 
-        st.text(" \n")
-        st.text(" \n")
+
+    with col2:
 
         st.write("""
-            ###### _Recommendation Module_:
-            - Receive personalized flight recommendations based on your preferences and budget. 
-            - Utilize machine learning techniques to discover cost-effective travel options.""")
+            ###### _Prediction Module_:
+            - Predict future flight fares accurately using machine learning algorithms. 
+            - Consider factors like departure time, airline, and historical data to plan your travel budget.""")
+                 
+        # st.text(" \n")
+        # st.text(" \n")
+
+        # st.write("""
+        #     ###### _Recommendation Module_:
+        #     - Receive personalized flight recommendations based on your preferences and budget. 
+        #     - Utilize machine learning techniques to discover cost-effective travel options.""")
         
         st.text(" \n")
         st.text(" \n")

@@ -100,15 +100,6 @@ def explain():
     array_df = pd.concat([array_df[['round_trip_duration','Days_to_Fly','flight_duration_value']],aggregated_df], axis=1)
     # st.text(array_df)    
 
-    # i = 0
-    # # Create a SHAP Explanation object for the selected sample
-    # explanation = shap.Explanation(
-    #     values=np.array(lst),
-    #     base_values=np.expm1(shap_values.base_values[i]),
-    #     data=new_data_point_df.iloc[i].values,
-    #     feature_names=new_data_point_df.columns
-    # )
-
     i = 0
     # Create a SHAP Explanation object for the selected sample
     explanation = shap.Explanation(
@@ -116,13 +107,55 @@ def explain():
         base_values=np.round(np.expm1(shap_values.base_values[i]), decimals=0),
         data=result_df.iloc[i].values,
         feature_names=result_df.columns
-    )
+    )   
+
+    # Find the top feature and its value
+    top_feature_index = np.argmax(np.abs(explanation.values))
+    top_feature_name = explanation.feature_names[top_feature_index]
+    top_feature_data = explanation.data[top_feature_index]
+    top_feature_value = explanation.values[top_feature_index]
+    sum_shap_values = explanation.base_values + np.sum(explanation.values)
+    pcent = round(top_feature_value*100/sum_shap_values)
+
+    st.header("Understand Price Prediction")
+
+    if top_feature_value > 0:
+        signal = "increasing"
+    else:
+        signal = "decreasing"
+
+    # st.markdown(f"""
+    # <div style='text-align: left;'>
+    # <h6 style='margin: 0; padding: 0;'>   Below plot can help you understand how different selections contribute towards flight price prediction. </h6>
+    # <h6 style='margin: 0; padding: 0;'> - Here, E[f(X)] represents average price of the flights. </h6>
+    # <h6 style='margin: 0; padding: 0;'> - f(X) is the predicted price based on the selections. </h6>
+    # <h6 style='margin: 0; padding: 0;'> - {top_feature_name} is contributing {pcent}% towards {signal} the price</h6>
+    # <h6 style='margin: 0; padding: 0;'> </h6>         
+    # </div>
+    # """, unsafe_allow_html=True)
 
     
+    st.write(f"""
+             
+    Below plot can help understand how different selections contribute towards flight price prediction.
+    - Here, E[f(X)] represents average price of the flights.
+    - f(X) is the predicted price based on the selections.
+    - {top_feature_name} is contributing {pcent}% towards {signal} the price
+             """)
+
+
 
     # Create a waterfall plot for the selected sample
-    shap.plots.waterfall(explanation)
+    fig, ax = plt.subplots()
+    shap.plots.waterfall(explanation, show=False)
+    plt.grid(False)  # This ensures no grid lines
+
+    # Turn off the grid for the captured axes
+    ax.grid(False)
     
+    # Set the background to be transparent
+    fig.patch.set_facecolor('none')
+    ax.patch.set_facecolor('none')
 
 
     

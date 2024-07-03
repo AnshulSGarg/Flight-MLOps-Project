@@ -6,8 +6,8 @@ import datetime
 import numpy as np
 
 def Price_Prediction():
-    st.title("Price Prediction")
-    st.header("Enter Input")
+    st.header("Price Prediction")
+    st.subheader("Select Input")
 
     with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_df.pkl','rb') as file:
         df = pickle.load(file)
@@ -142,10 +142,18 @@ def Price_Prediction():
             pickle.dump(prediction, f)
         lower_bound = round(prediction[0]) - 30
         upper_bound = round(prediction[0]) + 30
-        st.text('Prediction price should be between ${} and ${}'.format(lower_bound, upper_bound))
+        # st.text('Predicted price should be between ${} and ${}'.format(lower_bound, upper_bound))
+        st.markdown(f"""
+        <div style='text-align: left;'>
+        <h6 style='margin: 0; padding: 0;'> </h6> 
+        <h5 style='margin: 0; padding: 0;'> Predicted price should be between ${lower_bound} and ${upper_bound} </h5>
+        <h6 style='margin: 0; padding: 0;'> </h6>       
+        <h6 style='margin: 0; padding: 0;'> </h6> 
+        <h6 style='margin: 0; padding: 0;'> </h6>   
+        </div>
+        """, unsafe_allow_html=True)
 
-
-        st.header("Price Trend")
+        st.title("Price Trend")
         # Predict the trend
         pred_array = pipeline.predict(trend_df)
         pred_array = np.round(np.expm1(pred_array), 0)
@@ -204,12 +212,41 @@ def Price_Prediction():
             tooltip=[alt.Tooltip('x_str', title='Date'), alt.Tooltip('Price', format='$,.0f')]  # Add tooltips for both x_str and y values
         )
 
+        # Calculate percentiles
+        min_price = chart_df['Price'].min()
+        max_price = chart_df['Price'].max()
+        range_40 = min_price + 0.40 * (max_price - min_price)
+        range_70 = min_price + 0.70 * (max_price - min_price)
+
+        if prediction <= range_40:
+            desc = "For the selections you made prices can be lower. It is good time to make the bookings!"
+        elif prediction <= range_70:
+            desc = "For the selections you made prices are in typical range."
+        else:
+            desc = "Predicted price is higher. Analyze the trend or look deeper into insights to understand how different selections impact the price."
+        
+
+        st.markdown(f"""
+        <div style='text-align: left;'>
+        <h6 style='margin: 0; padding: 0;'> {desc} </h6>
+        <h6 style='margin: 0; padding: 0;'> </h6>      
+        <h6 style='margin: 0; padding: 0;'> </h6>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Dashed line at 50% range
+        green_line = alt.Chart(pd.DataFrame({'range_40': [range_40]})).mark_rule(color='yellow', strokeDash=[3,3]).encode(
+            y='range_40:Q')
+        
+        # Dashed line at 50% range
+        yellow_line = alt.Chart(pd.DataFrame({'range_70': [range_70]})).mark_rule(color='red', strokeDash=[3,3]).encode(
+            y='range_70:Q')
+
         # Layer the base chart with the highlight point
-        chart = (line_chart + point_chart + highlight_chart).properties(
+        chart = (line_chart + point_chart + highlight_chart + green_line + yellow_line).properties(
             width=800,
             height=400
         )
 
         # Display the chart
         st.altair_chart(chart, use_container_width=True)
-
