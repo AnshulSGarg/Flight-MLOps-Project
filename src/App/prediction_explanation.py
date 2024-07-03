@@ -123,20 +123,8 @@ def explain():
         signal = "increasing"
     else:
         signal = "decreasing"
-
-    # st.markdown(f"""
-    # <div style='text-align: left;'>
-    # <h6 style='margin: 0; padding: 0;'>   Below plot can help you understand how different selections contribute towards flight price prediction. </h6>
-    # <h6 style='margin: 0; padding: 0;'> - Here, E[f(X)] represents average price of the flights. </h6>
-    # <h6 style='margin: 0; padding: 0;'> - f(X) is the predicted price based on the selections. </h6>
-    # <h6 style='margin: 0; padding: 0;'> - {top_feature_name} is contributing {pcent}% towards {signal} the price</h6>
-    # <h6 style='margin: 0; padding: 0;'> </h6>         
-    # </div>
-    # """, unsafe_allow_html=True)
-
-    
+ 
     st.write(f"""
-             
     Below plot can help understand how different selections contribute towards flight price prediction.
     - Here, E[f(X)] represents average price of the flights.
     - f(X) is the predicted price based on the selections.

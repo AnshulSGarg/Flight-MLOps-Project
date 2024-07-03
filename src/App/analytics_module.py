@@ -21,7 +21,6 @@ def analysis():
 
     st.write("""Here is a detailed analysis of the impact of different feature selections on flight booking prices.  
              Select different feature labels to see how they are related to the flight price.  
-             
              """)
 
     selected = option_menu(

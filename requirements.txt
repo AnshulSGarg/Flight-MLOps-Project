@@ -13,4 +13,5 @@
 # streamlit
 # plotly
 # dvclive
-selenium
+# selenium
+# streamlit-option-menu
