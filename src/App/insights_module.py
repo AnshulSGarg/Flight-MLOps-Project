@@ -1,6 +1,12 @@
 import streamlit as st
 import matplotlib.pyplot as plt
 from streamlit_option_menu import option_menu
+import pathlib
+
+curr_dir = pathlib.Path(__file__)
+home_dir = curr_dir.parent.parent.parent
+raw_path = home_dir.as_posix() 
+insights_plot_path = raw_path  + r'/src/visualization/insights_plots/'
 
 one_way_features = ['carrier', 'Airport_Route', 'stop','Days_to_Fly', 'from_hour', 'flight_duration_value', 'Holiday', 'Fly_WeekDay']
 
@@ -69,7 +75,7 @@ def insights():
             </div>
             """, unsafe_allow_html=True)
             feature = round_trip_features[idx]
-            st.image(fr'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\insights_plots\round_trip_{feature}.png')
+            st.image(insights_plot_path + f'round_trip_{feature}.png')
 
     with col2:
         if selected in (option_list_one_way):
@@ -80,7 +86,7 @@ def insights():
             </div>
             """, unsafe_allow_html=True)
             feature = one_way_features[idx]
-            st.image(fr'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\insights_plots\one_way_{feature}.png')
+            st.image(insights_plot_path + f'one_way_{feature}.png')
         else:
             pass
 

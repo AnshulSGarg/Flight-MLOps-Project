@@ -4,19 +4,26 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
+import pathlib
+
+curr_dir = pathlib.Path(__file__)
+home_dir = curr_dir.parent.parent.parent
+raw_path = home_dir.as_posix() 
+pickle_path = raw_path  + r'/pickle_files/'
 
 
 def explain():
+    st.write(pickle_path)
 
-    file_path = r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_pipeline.pkl'
+    file_path = pickle_path + 'flight_pipeline.pkl'
     with open(file_path, 'rb') as file:
         pipeline = pk.load(file)
 
-    file_path = r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\one_df.pkl'
+    file_path = pickle_path + 'one_df.pkl'
     with open(file_path, 'rb') as file:
         one_df = pk.load(file)
 
-    file_path = r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\predicted_price.pkl'
+    file_path = pickle_path + 'predicted_price.pkl'
     with open(file_path, 'rb') as file:
         predicted_price = pk.load(file)
     # st.text(f'predicted_price is {predicted_price[0]}')
@@ -136,14 +143,30 @@ def explain():
     # Create a waterfall plot for the selected sample
     fig, ax = plt.subplots()
     shap.plots.waterfall(explanation, show=False)
-    plt.grid(False)  # This ensures no grid lines
-
-    # Turn off the grid for the captured axes
+    plt.grid(False)
     ax.grid(False)
     
     # Set the background to be transparent
     fig.patch.set_facecolor('none')
     ax.patch.set_facecolor('none')
+
+
+    # Customize the plot
+    plt.gca().xaxis.label.set_color('white')   # X-axis label color
+    plt.gca().yaxis.label.set_color('white')   # Y-axis label color
+    plt.gca().tick_params(axis='x', colors='white')  # X-axis tick color
+    plt.gca().tick_params(axis='y', colors='white')  # Y-axis tick color
+    plt.gca().title.set_color('white')         # Title color
+
+
+    # Set the color and size for text elements
+    for text in ax.get_xticklabels():
+        text.set_color('white')
+    for text in ax.get_yticklabels():
+        text.set_color('white')
+
+    ax.spines['bottom'].set_color('white')  # X-axis line color
+    ax.spines['bottom'].set_linewidth(1) 
 
 
     

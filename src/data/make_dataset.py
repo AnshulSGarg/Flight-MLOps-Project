@@ -73,9 +73,7 @@ from dvclive import Live
 import pickle
 import warnings
 
-# Ignore specific warning by category
 warnings.filterwarnings("ignore", category=UserWarning)
-# warnings.filterwarnings("ignore", category=DataConversionWarning)
 
 def split_data(df, split, seed):
     print('run split data')
@@ -127,10 +125,8 @@ def run_processed_data(merged_path, processed_path):
 
     merged_df = pd.read_csv(merged_path)    
     
-    # drop columns with price value missing
     merged_df = merged_df[~merged_df['price'].isnull()]
 
-    # drop duplicate columns from source_df
     merged_df = merged_df.drop_duplicates(keep='first')
 
     merged_df['Report_Run_Time'] = pd.to_datetime(merged_df['Report_Run_Time'])
@@ -168,13 +164,9 @@ def run_processed_data(merged_path, processed_path):
 
     merged_df['from_timestamp_1'] = pd.to_datetime(merged_df['from_date']) + pd.to_timedelta(merged_df['from_timestamp'].astype(str))
     merged_df['to_timestamp_1'] = pd.to_datetime(merged_df['to_date']) + pd.to_timedelta(merged_df['to_timestamp'].astype(str))
-
-    # merged_df['from_hour'] = merged_df['from_timestamp'].apply(lambda x:x.hour)
-    # merged_df['from_timestamp_1'] = pd.to_datetime(merged_df['from_timestamp_1'])
+    
     merged_df['from_hour'] = merged_df['from_timestamp_1'].dt.round('15min').dt.strftime('%H:%M')
-    # merged_df['from_date'] = pd.to_datetime(merged_df['from_date'] + ' 2024', format='%b %d %Y')
     merged_df['to_hour'] = merged_df['to_timestamp'].apply(lambda x:x.hour)
-    # merged_df['to_date'] = pd.to_datetime(merged_df['to_date'] + ' 2024', format='%b %d %Y')
 
     merged_df['flight_duration'] = merged_df['to_timestamp_1'] - merged_df['from_timestamp_1']
     merged_df.loc[merged_df['flight_duration'].dt.total_seconds() < 0, 'to_timestamp_1'] += pd.to_timedelta('1 day')
@@ -193,7 +185,6 @@ def run_processed_data(merged_path, processed_path):
     merged_df['Days_to_Fly'] = merged_df['from_date'] - pd.to_datetime(merged_df['Report_Run_Time'])
     merged_df['Days_to_Fly'] = merged_df['Days_to_Fly'].dt.days
 
-    # merged_df['flight_duration'] = merged_df['to_timestamp_1'] - merged_df['from_timestamp_1']
     merged_df['flight_duration_value'] = round(merged_df.flight_duration.dt.seconds/3600,1)
     merged_df.loc[merged_df['City_Route']=='New York City - Los Angeles', 'flight_duration_value'] = merged_df['flight_duration_value'] + 3
     merged_df.loc[merged_df['City_Route']=='Los Angeles - New York City', 'flight_duration_value'] = merged_df['flight_duration_value'] - 3

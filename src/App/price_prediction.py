@@ -4,15 +4,21 @@ import altair as alt
 import pickle
 import datetime
 import numpy as np
+import pathlib
+
+curr_dir = pathlib.Path(__file__)
+home_dir = curr_dir.parent.parent.parent
+raw_path = home_dir.as_posix() 
+pickle_path = raw_path  + r'/pickle_files/'
 
 def Price_Prediction():
     st.header("Price Prediction")
     st.subheader("Select Input")
 
-    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_df.pkl','rb') as file:
+    with open(pickle_path + 'flight_df.pkl','rb') as file:
         df = pickle.load(file)
 
-    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\flight_pipeline.pkl','rb') as file:
+    with open(pickle_path + 'flight_pipeline.pkl','rb') as file:
         pipeline = pickle.load(file)
 
     from pandas.tseries.holiday import USFederalHolidayCalendar
@@ -130,15 +136,14 @@ def Price_Prediction():
     trend_df = pd.concat([trend_df, pd.DataFrame(new_rows)], ignore_index=True)
     trend_df = trend_df.drop(trend_df.index[0])
     # st.dataframe(trend_df)
-    with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\one_df.pkl', 'wb') as f:
+    with open(pickle_path + 'one_df.pkl', 'wb') as f:
         pickle.dump(one_df, f)
-
 
     if st.button('Predict Price'):
     # Make a prediction
         prediction = pipeline.predict(one_df)
         prediction = np.expm1(prediction)
-        with open(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\pickle_files\predicted_price.pkl', 'wb') as f:
+        with open(pickle_path + 'flight_df.pkl', 'wb') as f:
             pickle.dump(prediction, f)
         lower_bound = round(prediction[0]) - 30
         upper_bound = round(prediction[0]) + 30

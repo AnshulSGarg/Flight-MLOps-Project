@@ -4,21 +4,21 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 import seaborn as sns
 import matplotlib.pyplot as plt
-import pickle
+import pathlib
+import yaml
+
+curr_dir = pathlib.Path(__file__)
+home_dir = curr_dir.parent.parent.parent
+raw_path = home_dir.as_posix() 
+analytics_plot_path = raw_path  + r'/src/visualization/analytics_plots/'
+
+
 
 
 def analysis():
+    st.text(curr_dir)
 
     st.header('Analytics')
-
-    # st.markdown("""
-    # <div style='text-align: left;'>
-    # <h6 style='margin: 0; padding: 0;'> - Here is detailed analysis of impact of different features selection of flight booking on price. </h6>
-    # <h6 style='margin: 0; padding: 0;'> - Select different feature labels to see how they are related to price of the flight. </h6>
-    # <h6 style='margin: 0; padding: 0;'> </h6>         
-    # </div>
-    # """, unsafe_allow_html=True)
-
     st.write("""Here is a detailed analysis of the impact of different feature selections on flight booking prices.  
              Select different feature labels to see how they are related to the flight price.  
              """)
@@ -31,8 +31,7 @@ def analysis():
     )
 
     if selected == "Flight Duration":
-        # st.subheader("Minimum Flight Duration")
-        st.image(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\analytics_plots\min_flight_duration.png')
+        st.image(analytics_plot_path + 'min_flight_duration.png')
         st.write("""
                 - Shorted flight duration is 5 hours for route between Los Angeles International Airport and Newark Liberty International Airport
                 - For LA to NY Route, shorted flight duration is 5 hours 54 mins for route between Los Angeles International Airport and La Guardia Airport
@@ -40,9 +39,8 @@ def analysis():
                 """)    
         
     if selected == "Trip Type":
-        # st.subheader("Average Price by Trip Type")
-        st.image(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\analytics_plots\price_by_trip_type.png')
-        file_path = r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\analytics_plots\carrier_overhead_bin.csv'
+        st.image(analytics_plot_path + 'price_by_trip_type.png')
+        file_path = analytics_plot_path + 'carrier_overhead_bin.csv'
         overhead_bin_df = pd.read_csv(file_path)
         overhead_bin_df.rename(columns={'carrier':'Carrier','overhead_bin': 'Overhead Bin'}, inplace=True)
         st.write("""
@@ -54,8 +52,7 @@ def analysis():
         st.dataframe(overhead_bin_df[['Carrier','Overhead Bin']], hide_index=True)
 
     if selected == "Carrier":
-        # st.subheader("Average Price by Carrier")
-        st.image(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\analytics_plots\price_by_carrier.png')
+        st.image(analytics_plot_path + 'price_by_carrier.png')
         st.write("""
         - Average price for route LA to NY around 5% more than average price for route NY to LA
         - Looking at the boxplot, there is lot of variation in price for each carrier. Price variation for delta are comparatively more stable. 
@@ -63,8 +60,7 @@ def analysis():
             """)
 
     if selected == "Days to Fly":
-        # st.subheader("Average Price by Days to Fly")
-        st.image(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\analytics_plots\days_to_fly_vs_price.png')
+        st.image(analytics_plot_path + 'days_to_fly_vs_price.png')
         st.write("""
         - Days to Fly is the difference in days between flight operation day and day of booking the flight.
         - Average price are very high when making booking couple of days before day of flying.
@@ -74,16 +70,14 @@ def analysis():
             """)
 
     if selected == "Round Trip Duration":
-        # st.subheader("Average Price by Round Trip Duration Days")
-        st.image(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\analytics_plots\price_by_round_trip_duration.png')
+        st.image(analytics_plot_path + 'price_by_round_trip_duration.png')
         st.write("""
         - Round Trip Duration is number of days between inbound and outbound flights
         - There seems to be no pattern between Price and Round Trip Days, highlighting that this feature might not impact price much.
         - Understanding Prediction Page can give more details information on this features based on custom user selection.
             """)
     if selected == "Day of the week":
-        # st.subheader("Average price by Weekday")
-        st.image(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\analytics_plots\price_by_weekday.png')
+        st.image(analytics_plot_path + 'price_by_weekday.png')
         st.write("""
         - Average price is higher for Sunday, followed by Thursday and Monday. 
         - Booking a flight for Tuesday and Wednesday can be comparatively cheaper.                  
