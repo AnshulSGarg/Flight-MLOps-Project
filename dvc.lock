@@ -1,12 +1,24 @@
 schema: '2.0'
 stages:
   make_dataset:
-    cmd: python .\src\data\make_dataset.py /data/interim/merged_raw_data.csv /data/processed/processed_raw_data.csv
+    cmd: python .\src\data\make_dataset.py /data/interim/merged_raw_data.csv
     deps:
     - path: .\src\data\make_dataset.py
       hash: md5
-      md5: 5ab831860d268f55806ad7012bd60145
-      size: 24193
+      md5: d89dea4d26f80bf78bf4f77ebb2077ed
+      size: 1158
+    - path: data\interim\merged_raw_data.csv
+      hash: md5
+      md5: 373b4f9c4eac0a8f811b0ec50e7cc6a3
+      size: 82194894
+  build_features:
+    cmd: python .\src\features\build_features.py /data/interim/merged_raw_data.csv
+      /data/processed/processed_raw_data.csv
+    deps:
+    - path: .\src\features\build_features.py
+      hash: md5
+      md5: ab4cec7d913ab08b0843d589231e4522
+      size: 11123
     - path: data\interim\merged_raw_data.csv
       hash: md5
       md5: 373b4f9c4eac0a8f811b0ec50e7cc6a3
@@ -15,7 +27,18 @@ stages:
       hash: md5
       md5: 405bf25fdbc69f4bfabc79b26ec7a0e4
       size: 11092160
+  train_model:
+    cmd: python .\src\models\train_model.py /data/processed/processed_raw_data.csv
+    deps:
+    - path: .\src\models\train_model.py
+      hash: md5
+      md5: 90ec8b4d9003f77f9686b9e851853b75
+      size: 8025
+    - path: data\processed\processed_raw_data.csv
+      hash: md5
+      md5: 405bf25fdbc69f4bfabc79b26ec7a0e4
+      size: 11092160
     params:
       params.yaml:
         make_dataset.seed: 42
-        make_dataset.test_split: 0.25
+        make_dataset.test_split: 0.2

@@ -16,3 +16,5 @@
 # selenium
 # streamlit-option-menu
 # ydata-profiling
+# xgboost
+# dvc-s3

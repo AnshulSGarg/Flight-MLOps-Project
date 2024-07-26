@@ -71,7 +71,6 @@ def insights():
             st.markdown("""
             <div style='text-align: center;'>
             <h5 style='margin: 0; padding: 0;'> Round Trip </h5>
-
             </div>
             """, unsafe_allow_html=True)
             feature = round_trip_features[idx]

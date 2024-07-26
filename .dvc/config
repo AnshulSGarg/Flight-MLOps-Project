@@ -1,5 +1,5 @@
 [core]
-    remote = my_remote
+    remote = s3://flight-mlops-bucket/path
     autostage = true
-['remote "my_remote"']
-    url = C:\Users\anshu\Desktop\Temp-folder\flight-mlops-storage
+['remote "my-remote"']
+    url = s3://flight-mlops-bucket/path
