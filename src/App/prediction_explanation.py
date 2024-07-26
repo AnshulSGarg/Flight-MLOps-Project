@@ -13,7 +13,6 @@ pickle_path = raw_path  + r'/pickle_files/'
 
 
 def explain():
-    st.write(pickle_path)
 
     file_path = pickle_path + 'flight_pipeline.pkl'
     with open(file_path, 'rb') as file:
@@ -170,11 +169,11 @@ def explain():
 
 
     
-    plt.savefig(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\shapely_plots\explain_waterfall.png', bbox_inches='tight')
+    plt.savefig(raw_path + r'\src\visualization\shapely_plots\explain_waterfall.png', bbox_inches='tight')
     plt.close()
 
     # Display the saved image in Streamlit
-    st.image(r'C:\Users\anshu\Desktop\MLOps\Flight-MLOps-Project\Flight-MLOps-Project\src\visualization\shapely_plots\explain_waterfall.png')
+    st.image(raw_path + r'\src\visualization\shapely_plots\explain_waterfall.png')
     
 
 

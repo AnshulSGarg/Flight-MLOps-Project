@@ -143,7 +143,7 @@ def Price_Prediction():
     # Make a prediction
         prediction = pipeline.predict(one_df)
         prediction = np.expm1(prediction)
-        with open(pickle_path + 'flight_df.pkl', 'wb') as f:
+        with open(pickle_path + 'predicted_price.pkl', 'wb') as f:
             pickle.dump(prediction, f)
         lower_bound = round(prediction[0]) - 30
         upper_bound = round(prediction[0]) + 30

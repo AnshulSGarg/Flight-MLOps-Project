@@ -14,14 +14,11 @@ def landing_page():
     </div>
     """, unsafe_allow_html=True)
 
-    # Create columns for layout with equal width
-    col1, col2 = st.columns([1, 1])  # Adjust the width ratio to equal columns
+    col1, col2 = st.columns([1, 1]) 
 
     with col1:
         st.text(" \n")
         st.text(" \n")
-        # st.text(" \n")
-        # st.text(" \n")
         st.write("""
             ##### _Description_
             JetPredict is the ultimate platform for predicting flight fares, focusing on route between airports in New York and Los Angeles.. 
@@ -38,28 +35,22 @@ def landing_page():
 
             map_df = pd.DataFrame(data)
 
-            # Separate DataFrame for highlighting specific airports
             highlight_df = map_df.copy()
 
-            # Set marker size for Los Angeles and New York
             highlight_df.loc[highlight_df['airport'] == 'Los Angeles', 'marker_size'] = 7
             highlight_df.loc[highlight_df['airport'] == 'New York', 'marker_size'] = 7
 
-            # Set default marker size for other airports
             highlight_df['marker_size'].fillna(5, inplace=True)
 
-            # Center the map and adjust the zoom to fit all points
             center_lat = (34.0522 + 40.7128) / 2
             center_lon = (-118.2437 + -74.0060) / 2
 
             fig = px.scatter_mapbox(highlight_df, lat="latitude", lon="longitude",
                                     color_discrete_sequence=["red"],
-                                    size='marker_size', zoom=1.5,  # Adjust zoom level
-                                    mapbox_style="open-street-map", width=20, height=300, hover_name="airport")  # Adjust width and height
-            fig.update_layout(mapbox=dict(center=dict(lat=center_lat, lon=center_lon)),
-                              showlegend=False)  # Hide the legend
+                                    size='marker_size', zoom=1.5,
+                                    mapbox_style="open-street-map", width=20, height=300, hover_name="airport")
+            fig.update_layout(mapbox=dict(center=dict(lat=center_lat, lon=center_lon)), showlegend=False)
 
-            # Add a line connecting Los Angeles and New York
             line_trace = go.Scattermapbox(
                 lat=[34.0522, 40.7128],
                 lon=[-118.2437, -74.0060],
@@ -68,15 +59,13 @@ def landing_page():
                 name='Flight Path'
             )
 
-            # Add the line trace to the figure
             fig.add_trace(line_trace)
 
             st.plotly_chart(fig, use_container_width=True)
 
-        # Run the analysis function
         analysis()
 
-    col1, col2 = st.columns([1, 1])  # Adjust the width ratio to equal columns
+    col1, col2 = st.columns([1, 1])
 
     with col1:
         st.write("""

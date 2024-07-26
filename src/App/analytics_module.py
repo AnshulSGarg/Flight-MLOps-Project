@@ -16,8 +16,6 @@ analytics_plot_path = raw_path  + r'/src/visualization/analytics_plots/'
 
 
 def analysis():
-    st.text(curr_dir)
-
     st.header('Analytics')
     st.write("""Here is a detailed analysis of the impact of different feature selections on flight booking prices.  
              Select different feature labels to see how they are related to the flight price.  
