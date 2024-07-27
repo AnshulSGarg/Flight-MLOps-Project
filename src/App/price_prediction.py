@@ -40,6 +40,7 @@ for s3_file, local_file in files_to_download.items():
 def Price_Prediction():
     st.header("Price Prediction")
     st.subheader("Select Input")
+    st.text(raw_path)
 
     with open(pickle_path + 'flight_df.pkl','rb') as file:
         df = pickle.load(file)
