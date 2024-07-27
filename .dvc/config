@@ -1,5 +1,5 @@
 [core]
-    remote = s3://flight-mlops-bucket/path
+    remote = my-remote
     autostage = true
 ['remote "my-remote"']
     url = s3://flight-mlops-bucket/path
