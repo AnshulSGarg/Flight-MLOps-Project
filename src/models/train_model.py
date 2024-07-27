@@ -28,7 +28,7 @@ raw_path = home_dir.as_posix()
 pickle_path = raw_path  + r'/pickle_files/'
 params_file = home_dir / 'params.yaml'
 params = yaml.safe_load(open(params_file))["make_dataset"]
-processed_path = home_dir.as_posix() + sys.argv[2]
+processed_path = home_dir.as_posix() + sys.argv[1]
 processed_test_train_path = home_dir.as_posix() + r'/data/processed'
 
 

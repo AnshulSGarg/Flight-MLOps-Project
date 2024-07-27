@@ -18,3 +18,7 @@ streamlit-option-menu
 ydata-profiling
 xgboost
 dvc-s3
+shap
+streamlit-option-menu
+seaborn
+boto3
