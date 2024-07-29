@@ -5,45 +5,20 @@ import pickle
 import datetime
 import numpy as np
 import pathlib
-import boto3
-import os
-from botocore.exceptions import NoCredentialsError
-
 
 curr_dir = pathlib.Path(__file__)
 home_dir = curr_dir.parent.parent.parent
 raw_path = home_dir.as_posix() 
 pickle_path = raw_path  + r'/pickle_files/'
 
-# Define S3 client
-s3 = boto3.client('s3')
-
-# Specify your S3 bucket and file paths
-bucket_name = 'flight-mlops-bucket'
-files_to_download = {
-    'flight_df.pkl': pickle_path + 'flight_df.pkl',
-    'flight_pipeline.pkl': pickle_path + 'flight_pipeline.pkl'
-}
-
-# Download files from S3 only if they don't exist locally
-for s3_file, local_file in files_to_download.items():
-    try:
-        # Check if the local file exists
-        if not os.path.exists(local_file):
-            print(f"Downloading {s3_file} from S3...")
-            s3.download_file(bucket_name, s3_file, local_file)
-        else:
-            print(f"{s3_file} already exists locally.")
-    except NoCredentialsError:
-        print("Credentials not available for accessing S3.")
 
 def Price_Prediction():
     st.header("Price Prediction")
     st.subheader("Select Input")
-    st.text(raw_path)
 
     with open(pickle_path + 'flight_df.pkl','rb') as file:
         df = pickle.load(file)
+        st.text(pickle_path + 'flight_df.pkl')
 
     with open(pickle_path + 'flight_pipeline.pkl','rb') as file:
         pipeline = pickle.load(file)
@@ -164,6 +139,7 @@ def Price_Prediction():
     trend_df = trend_df.drop(trend_df.index[0])
     # st.dataframe(trend_df)
     with open(pickle_path + 'one_df.pkl', 'wb') as f:
+        st.text(pickle_path + 'one_df.pkl')
         pickle.dump(one_df, f)
 
     if st.button('Predict Price'):

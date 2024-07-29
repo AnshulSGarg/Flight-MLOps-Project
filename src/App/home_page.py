@@ -40,7 +40,7 @@ def landing_page():
             highlight_df.loc[highlight_df['airport'] == 'Los Angeles', 'marker_size'] = 7
             highlight_df.loc[highlight_df['airport'] == 'New York', 'marker_size'] = 7
 
-            highlight_df['marker_size'].fillna(5, inplace=True)
+            highlight_df['marker_size'] = highlight_df['marker_size'].fillna(5)
 
             center_lat = (34.0522 + 40.7128) / 2
             center_lon = (-118.2437 + -74.0060) / 2
