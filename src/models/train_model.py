@@ -73,7 +73,7 @@ def main():
     # Creating a pipeline
     pipeline = Pipeline([
         ('preprocessor', preprocessor),
-        ('regressor', RandomForestRegressor())
+        ('regressor', RandomForestRegressor(n_estimators=25))
     ])
     pipeline
 
@@ -146,8 +146,6 @@ def main():
     with open(pickle_path + 'flight_pipeline.pkl', 'wb') as f:
     # Dump the data into the pickle file
         pickle.dump(pipeline, f)
-
-
 
     # # Finish dvclive logging
     # Live.save("final")

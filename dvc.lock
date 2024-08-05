@@ -32,8 +32,8 @@ stages:
     deps:
     - path: .\src\models\train_model.py
       hash: md5
-      md5: 5842a0447596aa9f1a11a0ee08b90695
-      size: 8025
+      md5: 4fb95bed5833598c14f0341a9dc88fbc
+      size: 8036
     - path: data\processed\processed_raw_data.csv
       hash: md5
       md5: 405bf25fdbc69f4bfabc79b26ec7a0e4
@@ -41,4 +41,4 @@ stages:
     params:
       params.yaml:
         make_dataset.seed: 42
-        make_dataset.test_split: 0.25
+        make_dataset.test_split: 0.3
